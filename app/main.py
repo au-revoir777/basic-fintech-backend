@@ -1,8 +1,8 @@
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
-from fastapi.responses import FileResponse
+from fastapi.responses import JSONResponse, FileResponse
+from fastapi.staticfiles import StaticFiles
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from app.api.v1.router import api_router
@@ -10,14 +10,14 @@ from app.core.config import get_settings
 from app.db.base import Base
 from app.db.session import engine
 
-
-from fastapi.staticfiles import StaticFiles
-
-app.mount("/static", StaticFiles(directory="app/static"), name="static")
-
 settings = get_settings()
 
+# ✅ Create app FIRST
 app = FastAPI(title=settings.app_name)
+
+# ✅ Mount static AFTER app is created
+app.mount("/static", StaticFiles(directory="app/static"), name="static")
+
 
 # CORS
 app.add_middleware(
@@ -28,6 +28,7 @@ app.add_middleware(
     allow_headers=["Authorization", "Content-Type"],
 )
 
+
 # Security headers
 @app.middleware("http")
 async def security_headers(request: Request, call_next):
@@ -37,7 +38,6 @@ async def security_headers(request: Request, call_next):
     response.headers["X-Frame-Options"] = "DENY"
     response.headers["Referrer-Policy"] = "no-referrer"
 
-    # ✅ Allow Swagger UI properly
     if request.url.path.startswith(("/docs", "/redoc", "/openapi.json")):
         response.headers["Content-Security-Policy"] = (
             "default-src 'self'; "
@@ -48,7 +48,6 @@ async def security_headers(request: Request, call_next):
             "font-src 'self' https://cdn.jsdelivr.net;"
         )
     else:
-        # Slightly relaxed (not completely blocked)
         response.headers["Content-Security-Policy"] = (
             "default-src 'self'; "
             "img-src 'self' data:; "
@@ -95,14 +94,17 @@ def root():
         "base_path": "/api/v1",
     }
 
+
+# ✅ Favicon route
 @app.get("/favicon.ico")
 def favicon():
     return FileResponse("app/static/favicon.ico")
-    
+
+
 app.include_router(api_router, prefix=settings.api_v1_prefix)
 
 
-# ✅ FIX: Move DB initialization to startup (NOT at import time)
+# DB init
 @app.on_event("startup")
 def on_startup():
     try:
