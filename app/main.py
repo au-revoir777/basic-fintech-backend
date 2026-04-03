@@ -107,8 +107,4 @@ app.include_router(api_router, prefix=settings.api_v1_prefix)
 # DB init
 @app.on_event("startup")
 def on_startup():
-    try:
-        Base.metadata.create_all(bind=engine)
-        print("Database initialized successfully")
-    except Exception as e:
-        print(f"Database init failed: {e}")
+    print("App started (DB handled by Alembic)")

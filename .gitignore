@@ -178,3 +178,21 @@ yarn-error.log*
 .env.development
 .env.test
 .env.production
+
+# --- Project Specific ---
+
+# Local DB (should not be committed)
+finance.db
+
+# Environment variables
+.env
+.env.*
+
+# Vercel
+.vercel
+
+# Python compiled files
+*.pyc
+
+# Alembic cache
+alembic/__pycache__/
