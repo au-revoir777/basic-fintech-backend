@@ -2,10 +2,10 @@ from datetime import date
 from typing import List
 from sqlalchemy import and_, case, func, select
 from sqlalchemy.orm import Session
-from sqlalchemy import text
 
 from app.models.financial_record import FinancialRecord
 from app.models.enums import RecordType
+from app.schemas.dashboard import TrendPoint  # make sure this exists
 
 
 class RecordRepository:
@@ -20,7 +20,10 @@ class RecordRepository:
 
     def get_by_id(self, record_id: int) -> FinancialRecord | None:
         return self.db.scalar(
-            select(FinancialRecord).where(FinancialRecord.id == record_id, FinancialRecord.is_deleted.is_(False))
+            select(FinancialRecord).where(
+                FinancialRecord.id == record_id,
+                FinancialRecord.is_deleted.is_(False)
+            )
         )
 
     def list(
@@ -48,7 +51,8 @@ class RecordRepository:
         total = self.db.scalar(select(func.count()).select_from(stmt.subquery())) or 0
 
         sort_col = FinancialRecord.record_date if sort_by == "date" else FinancialRecord.amount
-        stmt = stmt.order_by(sort_col.desc() if sort_order == "desc" else sort_col.asc()).offset(skip).limit(limit)
+        stmt = stmt.order_by(sort_col.desc() if sort_order == "desc" else sort_col.asc()) \
+                   .offset(skip).limit(limit)
         items = list(self.db.scalars(stmt).all())
         return total, items
 
@@ -61,12 +65,14 @@ class RecordRepository:
     def summary(self) -> tuple:
         income = self.db.scalar(
             select(func.coalesce(func.sum(FinancialRecord.amount), 0)).where(
-                FinancialRecord.is_deleted.is_(False), FinancialRecord.record_type == RecordType.INCOME.value
+                FinancialRecord.is_deleted.is_(False),
+                FinancialRecord.record_type == RecordType.INCOME.value
             )
         )
         expense = self.db.scalar(
             select(func.coalesce(func.sum(FinancialRecord.amount), 0)).where(
-                FinancialRecord.is_deleted.is_(False), FinancialRecord.record_type == RecordType.EXPENSE.value
+                FinancialRecord.is_deleted.is_(False),
+                FinancialRecord.record_type == RecordType.EXPENSE.value
             )
         )
         category_rows = self.db.execute(
@@ -76,32 +82,32 @@ class RecordRepository:
         ).all()
         return income, expense, {category: total for category, total in category_rows}
 
-    def trends(self, by: str):
-    # PostgreSQL-compatible format
-    fmt = "YYYY-IW" if by == "weekly" else "YYYY-MM"
+    def trends(self, by: str) -> List[TrendPoint]:
+        """Return income/expense trends grouped by month or week (PostgreSQL compatible)"""
+        fmt = "YYYY-IW" if by == "weekly" else "YYYY-MM"
 
-    rows = self.db.execute(
-        select(
-            func.to_char(FinancialRecord.record_date, fmt).label("period"),
-            func.sum(
-                case(
-                    (FinancialRecord.record_type == RecordType.INCOME.value, FinancialRecord.amount),
-                    else_=0,
-                )
-            ).label("income"),
-            func.sum(
-                case(
-                    (FinancialRecord.record_type == RecordType.EXPENSE.value, FinancialRecord.amount),
-                    else_=0,
-                )
-            ).label("expense"),
-        )
-        .where(FinancialRecord.is_deleted.is_(False))
-        .group_by("period")
-        .order_by("period")
-    ).all()
+        rows = self.db.execute(
+            select(
+                func.to_char(FinancialRecord.record_date, fmt).label("period"),
+                func.sum(
+                    case(
+                        (FinancialRecord.record_type == RecordType.INCOME.value, FinancialRecord.amount),
+                        else_=0,
+                    )
+                ).label("income"),
+                func.sum(
+                    case(
+                        (FinancialRecord.record_type == RecordType.EXPENSE.value, FinancialRecord.amount),
+                        else_=0,
+                    )
+                ).label("expense"),
+            )
+            .where(FinancialRecord.is_deleted.is_(False))
+            .group_by("period")
+            .order_by("period")
+        ).all()
 
-    return rows
+        return [TrendPoint(period=r.period, income=r.income, expense=r.expense) for r in rows]
 
     def recent(self, limit: int = 10) -> List[FinancialRecord]:
         return list(
