@@ -2,12 +2,18 @@ from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from fastapi.responses import FileResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from app.api.v1.router import api_router
 from app.core.config import get_settings
 from app.db.base import Base
 from app.db.session import engine
+
+
+from fastapi.staticfiles import StaticFiles
+
+app.mount("/static", StaticFiles(directory="app/static"), name="static")
 
 settings = get_settings()
 
@@ -89,7 +95,10 @@ def root():
         "base_path": "/api/v1",
     }
 
-
+@app.get("/favicon.ico")
+def favicon():
+    return FileResponse("app/static/favicon.ico")
+    
 app.include_router(api_router, prefix=settings.api_v1_prefix)
 
 
