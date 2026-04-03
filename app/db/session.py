@@ -11,8 +11,8 @@ settings = get_settings()
 # For serverless environments (e.g. Vercel), avoid writing sqlite file into read-only project root.
 # Use /tmp for local file-based sqlite storage under serverless containers.
 database_url = settings.database_url
-if database_url.startswith("sqlite") and not database_url.startswith("sqlite:////"):
-    # Not an absolute path: use /tmp
+if database_url.startswith("sqlite") and not database_url.startswith("sqlite:////") and ":memory:" not in database_url:
+    # Not an absolute path and not in-memory: use /tmp
     parsed = urlparse(database_url)
     file_name = os.path.basename(parsed.path) or "finance.db"
     tmp_path = f"/tmp/{file_name}"
