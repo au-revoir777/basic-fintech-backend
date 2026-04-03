@@ -5,21 +5,22 @@ from fastapi.responses import JSONResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
+import os
+
 from app.api.v1.router import api_router
 from app.core.config import get_settings
-from app.db.base import Base
-from app.db.session import engine
 
 settings = get_settings()
 
-# ✅ Create app FIRST
+# ✅ Create app
 app = FastAPI(title=settings.app_name)
 
-# ✅ Mount static AFTER app is created
-app.mount("/static", StaticFiles(directory="app/static"), name="static")
+# ✅ Mount static safely (important for Vercel)
+if os.path.exists("app/static"):
+    app.mount("/static", StaticFiles(directory="app/static"), name="static")
 
 
-# CORS
+# ✅ CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.cors_origins_list,
@@ -29,7 +30,7 @@ app.add_middleware(
 )
 
 
-# Security headers
+# ✅ Security headers
 @app.middleware("http")
 async def security_headers(request: Request, call_next):
     response = await call_next(request)
@@ -57,7 +58,7 @@ async def security_headers(request: Request, call_next):
     return response
 
 
-# Exception handlers
+# ✅ Exception handlers
 @app.exception_handler(StarletteHTTPException)
 async def http_exception_handler(_: Request, exc: StarletteHTTPException):
     return JSONResponse(
@@ -80,7 +81,7 @@ async def validation_exception_handler(_: Request, exc: RequestValidationError):
     )
 
 
-# Routes
+# ✅ Routes
 @app.get("/health")
 def health_check():
     return {"status": "ok"}
@@ -95,16 +96,14 @@ def root():
     }
 
 
-# ✅ Favicon route
+# ✅ Favicon (safe handling)
 @app.get("/favicon.ico")
 def favicon():
-    return FileResponse("app/static/favicon.ico")
+    path = "app/static/favicon.ico"
+    if os.path.exists(path):
+        return FileResponse(path)
+    return {"message": "No favicon"}
 
 
+# ✅ Include API routes
 app.include_router(api_router, prefix=settings.api_v1_prefix)
-
-
-# DB init
-@app.on_event("startup")
-def on_startup():
-    print("App started (DB handled by Alembic)")
