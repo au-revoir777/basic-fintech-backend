@@ -7,7 +7,13 @@ try:
 except Exception as e:
     print(f"Error importing app: {e}", file=sys.stderr)
     print(traceback.format_exc(), file=sys.stderr)
-    raise
+    # Create a dummy app for graceful error handling
+    from fastapi import FastAPI
+    app = FastAPI()
+    
+    @app.get("/")
+    def error_root():
+        return {"error": str(e)}
 
 # Vercel expects the app to be named 'app'
 # This is the entry point for the serverless function
