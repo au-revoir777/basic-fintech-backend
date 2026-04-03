@@ -1,9 +1,10 @@
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse, FileResponse
+from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from starlette.exceptions import HTTPException as StarletteHTTPException
+from fastapi.openapi.docs import get_swagger_ui_html
 
 import os
 
@@ -12,12 +13,29 @@ from app.core.config import get_settings
 
 settings = get_settings()
 
-# ✅ Create app
-app = FastAPI(title=settings.app_name)
+# ✅ Create app (disable default docs to customize favicon)
+app = FastAPI(
+    title=settings.app_name,
+    docs_url=None,
+    redoc_url=None
+)
 
-# ✅ Mount static safely (important for Vercel)
-if os.path.exists("app/static"):
-    app.mount("/static", StaticFiles(directory="app/static"), name="static")
+# ✅ Mount static (serverless-safe)
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+STATIC_DIR = os.path.join(BASE_DIR, "static")
+
+if os.path.exists(STATIC_DIR):
+    app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
+
+
+# ✅ Custom Swagger UI with favicon
+@app.get("/docs", include_in_schema=False)
+def custom_docs():
+    return get_swagger_ui_html(
+        openapi_url=app.openapi_url,
+        title="API Docs",
+        swagger_favicon_url="/static/favicon.ico",
+    )
 
 
 # ✅ CORS
@@ -39,7 +57,7 @@ async def security_headers(request: Request, call_next):
     response.headers["X-Frame-Options"] = "DENY"
     response.headers["Referrer-Policy"] = "no-referrer"
 
-    if request.url.path.startswith(("/docs", "/redoc", "/openapi.json")):
+    if request.url.path.startswith(("/docs", "/openapi.json")):
         response.headers["Content-Security-Policy"] = (
             "default-src 'self'; "
             "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net; "
@@ -81,12 +99,13 @@ async def validation_exception_handler(_: Request, exc: RequestValidationError):
     )
 
 
-# ✅ Routes
+# ✅ Health check
 @app.get("/health")
 def health_check():
     return {"status": "ok"}
 
 
+# ✅ Root endpoint
 @app.get("/")
 def root():
     return {
@@ -94,15 +113,6 @@ def root():
         "message": "Finance Dashboard API",
         "base_path": "/api/v1",
     }
-
-
-# ✅ Favicon (safe handling)
-@app.get("/favicon.ico")
-def favicon():
-    path = "app/static/favicon.ico"
-    if os.path.exists(path):
-        return FileResponse(path)
-    return {"message": "No favicon"}
 
 
 # ✅ Include API routes
