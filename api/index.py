@@ -2,7 +2,7 @@ import sys
 import traceback
 from fastapi import FastAPI
 
-# Create app FIRST (important for Vercel detection)
+# Create app FIRST so Vercel can detect it
 app = FastAPI()
 
 try:

@@ -13,6 +13,7 @@ settings = get_settings()
 
 app = FastAPI(title=settings.app_name)
 
+# CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.cors_origins_list,
@@ -21,7 +22,7 @@ app.add_middleware(
     allow_headers=["Authorization", "Content-Type"],
 )
 
-
+# Security headers
 @app.middleware("http")
 async def security_headers(request: Request, call_next):
     response = await call_next(request)
@@ -29,7 +30,6 @@ async def security_headers(request: Request, call_next):
     response.headers["X-Frame-Options"] = "DENY"
     response.headers["Referrer-Policy"] = "no-referrer"
     
-    # Relax CSP for docs endpoints to allow Swagger UI
     if request.url.path in ["/docs", "/redoc", "/openapi.json"]:
         response.headers["Content-Security-Policy"] = (
             "default-src 'self'; "
@@ -44,16 +44,30 @@ async def security_headers(request: Request, call_next):
     return response
 
 
+# Exception handlers
 @app.exception_handler(StarletteHTTPException)
 async def http_exception_handler(_: Request, exc: StarletteHTTPException):
-    return JSONResponse(status_code=exc.status_code, content={"error": {"message": exc.detail, "code": exc.status_code}})
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={"error": {"message": exc.detail, "code": exc.status_code}},
+    )
 
 
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(_: Request, exc: RequestValidationError):
-    return JSONResponse(status_code=400, content={"error": {"message": "Validation error", "details": exc.errors(), "code": 400}})
+    return JSONResponse(
+        status_code=400,
+        content={
+            "error": {
+                "message": "Validation error",
+                "details": exc.errors(),
+                "code": 400,
+            }
+        },
+    )
 
 
+# Routes
 @app.get("/health")
 def health_check():
     return {"status": "ok"}
@@ -61,11 +75,21 @@ def health_check():
 
 @app.get("/")
 def root():
-    return {"status": "ok", "message": "Finance Dashboard API", "base_path": "/api/v1"}
+    return {
+        "status": "ok",
+        "message": "Finance Dashboard API",
+        "base_path": "/api/v1",
+    }
 
 
 app.include_router(api_router, prefix=settings.api_v1_prefix)
 
 
-# For local convenience only; production should use Alembic migrations.
-Base.metadata.create_all(bind=engine)
+# ✅ FIX: Move DB initialization to startup (NOT at import time)
+@app.on_event("startup")
+def on_startup():
+    try:
+        Base.metadata.create_all(bind=engine)
+        print("Database initialized successfully")
+    except Exception as e:
+        print(f"Database init failed: {e}")
