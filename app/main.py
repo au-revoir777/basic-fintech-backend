@@ -26,21 +26,29 @@ app.add_middleware(
 @app.middleware("http")
 async def security_headers(request: Request, call_next):
     response = await call_next(request)
+
     response.headers["X-Content-Type-Options"] = "nosniff"
     response.headers["X-Frame-Options"] = "DENY"
     response.headers["Referrer-Policy"] = "no-referrer"
-    
-    if request.url.path in ["/docs", "/redoc", "/openapi.json"]:
+
+    # ✅ Allow Swagger UI properly
+    if request.url.path.startswith(("/docs", "/redoc", "/openapi.json")):
         response.headers["Content-Security-Policy"] = (
             "default-src 'self'; "
-            "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; "
+            "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net; "
             "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; "
-            "img-src 'self' https://fastapi.tiangolo.com data:; "
-            "connect-src 'self' https://cdn.jsdelivr.net"
+            "img-src 'self' data: https://fastapi.tiangolo.com; "
+            "connect-src 'self'; "
+            "font-src 'self' https://cdn.jsdelivr.net;"
         )
     else:
-        response.headers["Content-Security-Policy"] = "default-src 'none'"
-    
+        # Slightly relaxed (not completely blocked)
+        response.headers["Content-Security-Policy"] = (
+            "default-src 'self'; "
+            "img-src 'self' data:; "
+            "style-src 'self' 'unsafe-inline';"
+        )
+
     return response
 
 
