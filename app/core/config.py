@@ -7,7 +7,7 @@ from pydantic_settings import BaseSettings
 class Settings(BaseSettings):
     app_name: str = "Finance Dashboard API"
     api_v1_prefix: str = "/api/v1"
-    database_url: str = "sqlite:///./finance.db"
+    database_url: str = "sqlite:///:memory:"
 
     jwt_secret_key: str = "change-me-super-secret"
     jwt_algorithm: str = "HS256"
