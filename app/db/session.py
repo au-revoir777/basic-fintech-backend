@@ -19,7 +19,7 @@ if database_url.startswith("sqlite") and not database_url.startswith("sqlite:///
     os.makedirs(os.path.dirname(tmp_path), exist_ok=True)
     database_url = f"sqlite:///{tmp_path}"
 
-connect_args = {"check_same_thread": False} if database_url.startswith("sqlite") else {}
+connect_args = {"check_same_thread": False} if database_url.startswith("sqlite") and ":memory:" not in database_url else {}
 
 engine = create_engine(database_url, pool_pre_ping=True, connect_args=connect_args)
 SessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False, expire_on_commit=False)
