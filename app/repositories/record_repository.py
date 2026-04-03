@@ -2,6 +2,7 @@ from datetime import date
 from typing import List
 from sqlalchemy import and_, case, func, select
 from sqlalchemy.orm import Session
+from sqlalchemy import text
 
 from app.models.financial_record import FinancialRecord
 from app.models.enums import RecordType
@@ -76,18 +77,31 @@ class RecordRepository:
         return income, expense, {category: total for category, total in category_rows}
 
     def trends(self, by: str):
-        fmt = "%Y-%W" if by == "weekly" else "%Y-%m"
-        rows = self.db.execute(
-            select(
-                func.strftime(fmt, FinancialRecord.record_date).label("period"),
-                func.sum(case((FinancialRecord.record_type == RecordType.INCOME.value, FinancialRecord.amount), else_=0)).label("income"),
-                func.sum(case((FinancialRecord.record_type == RecordType.EXPENSE.value, FinancialRecord.amount), else_=0)).label("expense"),
-            )
-            .where(FinancialRecord.is_deleted.is_(False))
-            .group_by("period")
-            .order_by("period")
-        ).all()
-        return rows
+    # PostgreSQL-compatible format
+    fmt = "YYYY-IW" if by == "weekly" else "YYYY-MM"
+
+    rows = self.db.execute(
+        select(
+            func.to_char(FinancialRecord.record_date, fmt).label("period"),
+            func.sum(
+                case(
+                    (FinancialRecord.record_type == RecordType.INCOME.value, FinancialRecord.amount),
+                    else_=0,
+                )
+            ).label("income"),
+            func.sum(
+                case(
+                    (FinancialRecord.record_type == RecordType.EXPENSE.value, FinancialRecord.amount),
+                    else_=0,
+                )
+            ).label("expense"),
+        )
+        .where(FinancialRecord.is_deleted.is_(False))
+        .group_by("period")
+        .order_by("period")
+    ).all()
+
+    return rows
 
     def recent(self, limit: int = 10) -> List[FinancialRecord]:
         return list(
