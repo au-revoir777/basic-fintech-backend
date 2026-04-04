@@ -22,7 +22,8 @@ def create_record(
     db: Session = Depends(get_db),
 ):
     enforce_rate_limit(request)
-    return RecordService(db).create(payload, user.id)
+    record = RecordService(db).create(payload, user.id)
+    return RecordResponse.model_validate(record)
 
 
 @router.get("", response_model=PaginatedRecords, dependencies=[Depends(require_roles(Role.VIEWER, Role.ANALYST, Role.ADMIN))])
@@ -38,13 +39,16 @@ def list_records(
     db: Session = Depends(get_db),
 ):
     total, items = RecordService(db).list(skip, limit, category, record_type.value if record_type else None, start_date, end_date, sort_by, sort_order)
-    return {"total": total, "items": items}
-
+    return {
+    "total": total,
+    "items": [RecordResponse.model_validate(item) for item in items]
+}
 
 @router.patch("/{record_id}", response_model=RecordResponse)
 def update_record(record_id: int, payload: RecordUpdate, user: User = Depends(analyst_or_admin), db: Session = Depends(get_db)):
     _ = user
-    return RecordService(db).update(record_id, payload)
+    record = RecordService(db).update(record_id, payload)
+    return RecordResponse.model_validate(record)
 
 
 @router.delete("/{record_id}", status_code=status.HTTP_204_NO_CONTENT, dependencies=[Depends(require_roles(Role.ADMIN))])

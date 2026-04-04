@@ -2,7 +2,7 @@ from datetime import date, datetime
 from decimal import Decimal
 from typing import List
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, field_validator, ConfigDict, field_serializer
 
 from app.models.enums import RecordType
 
@@ -40,8 +40,13 @@ class RecordResponse(RecordBase):
     created_at: datetime
     updated_at: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(
+        from_attributes=True
+    )
+    
+    @field_serializer("amount")
+    def serialize_amount(self, value):
+        return float(value)
 
 
 class PaginatedRecords(BaseModel):

@@ -5,6 +5,7 @@ from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from fastapi.openapi.docs import get_swagger_ui_html
+from fastapi.encoders import jsonable_encoder
 
 import os
 
@@ -89,16 +90,16 @@ async def http_exception_handler(_: Request, exc: StarletteHTTPException):
 async def validation_exception_handler(_: Request, exc: RequestValidationError):
     return JSONResponse(
         status_code=400,
-        content={
+        content=jsonable_encoder({   # ✅ FIX HERE
             "error": {
                 "message": "Validation error",
                 "details": exc.errors(),
                 "code": 400,
             }
-        },
+        }),
     )
 
-
+    
 # ✅ Health check
 @app.get("/health")
 def health_check():

@@ -25,8 +25,13 @@ class AuthService:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
 
         now = datetime.now(timezone.utc)
-        if user.locked_until and user.locked_until > now:
-            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Account locked. Try again later.")
+
+        if user.locked_until:
+            if self._to_utc(user.locked_until) > now:
+                raise HTTPException(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    detail="Account locked. Try again later."
+                )
 
         if not verify_password(password, user.password_hash):
             user.failed_login_attempts += 1
@@ -90,3 +95,9 @@ class AuthService:
         payload = decode_token(token)
         exp = datetime.fromtimestamp(payload["exp"], timezone.utc)
         self.token_repo.revoke(jti=payload.get("jti", ""), token_type=payload.get("type", "unknown"), expires_at=exp)
+
+    @staticmethod
+    def _to_utc(dt: datetime) -> datetime:
+        if dt.tzinfo is None:
+            return dt.replace(tzinfo=timezone.utc)
+            return dt.astimezone(timezone.utc)
