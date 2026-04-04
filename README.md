@@ -98,6 +98,16 @@ The API documentation is automatically generated and available at the `/docs` en
 
 Access the interactive API documentation here: [https://zorvyn-deploy.vercel.app/docs](https://zorvyn-deploy.vercel.app/docs)
 
+> **Important:**
+> Use the following admin credentials to obtain a JWT token for demo purposes:
+
+```json
+{
+  "email": "admin@example.com",
+  "password": "admin"
+}
+```
+
 ### Example API Calls
 
 **1. User Registration (POST /api/v1/users/register)**
