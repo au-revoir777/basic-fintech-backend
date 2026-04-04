@@ -64,7 +64,7 @@ async def security_headers(request: Request, call_next):
             "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net; "
             "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; "
             "img-src 'self' data: https://fastapi.tiangolo.com; "
-            "connect-src 'self'; "
+            "connect-src 'self' https://cdn.jsdelivr.net; "
             "font-src 'self' https://cdn.jsdelivr.net;"
         )
     else:
