@@ -9,7 +9,7 @@ client = TestClient(app)
 
 
 # -------------------------
-# Helpers (MATCH YOUR WORKING TESTS)
+# Helpers 
 # -------------------------
 
 def create_user(role: str):

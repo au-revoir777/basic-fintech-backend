@@ -5,8 +5,6 @@ from alembic import context
 
 from app.core.config import get_settings
 from app.db.base import Base
-
-# ✅ IMPORT ALL MODELS (IMPORTANT)
 from app.models import user, financial_record, token_blocklist  # noqa
 
 config = context.config
@@ -15,7 +13,7 @@ config = context.config
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
-# ✅ Use your app's DB URL
+
 settings = get_settings()
 config.set_main_option("sqlalchemy.url", settings.database_url)
 
@@ -28,7 +26,7 @@ def run_migrations_offline():
         url=url,
         target_metadata=target_metadata,
         literal_binds=True,
-        compare_type=True,   # ✅ detect column changes
+        compare_type=True,   
     )
 
     with context.begin_transaction():
@@ -46,7 +44,7 @@ def run_migrations_online():
         context.configure(
             connection=connection,
             target_metadata=target_metadata,
-            compare_type=True,  # ✅ detect changes
+            compare_type=True,  
         )
 
         with context.begin_transaction():

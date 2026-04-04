@@ -13,7 +13,7 @@ class User(Base):
         Integer,
         primary_key=True,
         index=True,
-        autoincrement=True  # ✅ explicit
+        autoincrement=True  
     )
 
     email: Mapped[str] = mapped_column(
@@ -52,20 +52,20 @@ class User(Base):
 
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
-        default=lambda: datetime.now(timezone.utc),  # ✅ FIXED
+        default=lambda: datetime.now(timezone.utc),  
         nullable=False
     )
 
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
-        default=lambda: datetime.now(timezone.utc),  # ✅ FIXED
+        default=lambda: datetime.now(timezone.utc),  
         onupdate=lambda: datetime.now(timezone.utc),
         nullable=False
     )
 
-    # ✅ relationship improvements
+    
     records = relationship(
         "FinancialRecord",
         back_populates="owner",
-        cascade="all, delete-orphan"  # ✅ prevents orphan records
+        cascade="all, delete-orphan"  
     )

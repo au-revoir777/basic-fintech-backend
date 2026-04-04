@@ -27,7 +27,8 @@ class AuthService:
         now = datetime.now(timezone.utc)
 
         if user.locked_until:
-            if self._to_utc(user.locked_until) > now:
+            locked_until = self._to_utc(user.locked_until)
+            if locked_until and locked_until > now:
                 raise HTTPException(
                     status_code=status.HTTP_403_FORBIDDEN,
                     detail="Account locked. Try again later."
@@ -100,4 +101,4 @@ class AuthService:
     def _to_utc(dt: datetime) -> datetime:
         if dt.tzinfo is None:
             return dt.replace(tzinfo=timezone.utc)
-            return dt.astimezone(timezone.utc)
+        return dt.astimezone(timezone.utc)

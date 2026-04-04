@@ -50,7 +50,7 @@ def get_current_user(
             detail="Invalid user"
         )
 
-    # ✅ FIX: normalize timezone
+    # normalize timezone
     if user.locked_until:
         if _to_utc(user.locked_until) > datetime.now(timezone.utc):
             raise HTTPException(

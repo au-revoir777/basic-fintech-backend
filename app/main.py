@@ -14,14 +14,14 @@ from app.core.config import get_settings
 
 settings = get_settings()
 
-# ✅ Create app (disable default docs to customize favicon)
+# create app (disable default docs to customize favicon)
 app = FastAPI(
     title=settings.app_name,
     docs_url=None,
     redoc_url=None
 )
 
-# ✅ Mount static (serverless-safe)
+# mount static (serverless-safe)
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 STATIC_DIR = os.path.join(BASE_DIR, "static")
 
@@ -29,7 +29,7 @@ if os.path.exists(STATIC_DIR):
     app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
 
-# ✅ Custom Swagger UI with favicon
+# custom Swagger UI with favicon
 @app.get("/docs", include_in_schema=False)
 def custom_docs():
     return get_swagger_ui_html(
@@ -39,7 +39,7 @@ def custom_docs():
     )
 
 
-# ✅ CORS
+# CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.cors_origins_list,
@@ -49,7 +49,7 @@ app.add_middleware(
 )
 
 
-# ✅ Security headers
+# Security headers
 @app.middleware("http")
 async def security_headers(request: Request, call_next):
     response = await call_next(request)
@@ -77,7 +77,7 @@ async def security_headers(request: Request, call_next):
     return response
 
 
-# ✅ Exception handlers
+# Exception handlers
 @app.exception_handler(StarletteHTTPException)
 async def http_exception_handler(_: Request, exc: StarletteHTTPException):
     return JSONResponse(
@@ -90,7 +90,7 @@ async def http_exception_handler(_: Request, exc: StarletteHTTPException):
 async def validation_exception_handler(_: Request, exc: RequestValidationError):
     return JSONResponse(
         status_code=400,
-        content=jsonable_encoder({   # ✅ FIX HERE
+        content=jsonable_encoder({   
             "error": {
                 "message": "Validation error",
                 "details": exc.errors(),
@@ -100,13 +100,13 @@ async def validation_exception_handler(_: Request, exc: RequestValidationError):
     )
 
     
-# ✅ Health check
+# Health check
 @app.get("/health")
 def health_check():
     return {"status": "ok"}
 
 
-# ✅ Root endpoint
+# Root endpoint
 @app.get("/")
 def root():
     return {
@@ -116,5 +116,5 @@ def root():
     }
 
 
-# ✅ Include API routes
+# Include API routes
 app.include_router(api_router, prefix=settings.api_v1_prefix)

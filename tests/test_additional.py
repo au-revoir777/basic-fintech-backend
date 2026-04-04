@@ -54,7 +54,7 @@ def auth_headers(token: str):
 
 def valid_record_payload():
     return {
-        "amount": 1000.0,  # ✅ float (not Decimal)
+        "amount": 1000.0,  
         "category": "Salary",
         "record_type": "income",
         "record_date": "2024-01-01",
@@ -91,7 +91,7 @@ def test_revoked_token():
 
     token_data = decode_token(token)
 
-    # ✅ FIX: pass required args
+    
     TokenRepository(db).revoke(
         jti=token_data["jti"],
         token_type="access",
@@ -114,7 +114,7 @@ def test_locked_user():
     db = SessionLocal()
     user, email = create_user(db, "viewer")
 
-    # ✅ FIX: use naive datetime
+    
     user.locked_until = datetime.utcnow() + timedelta(minutes=5)
     db.commit()
 
@@ -148,7 +148,7 @@ def test_negative_amount():
     headers = auth_headers(token)
 
     payload = valid_record_payload()
-    payload["amount"] = -100.0  # ✅ float
+    payload["amount"] = -100.0  
 
     res = client.post("/api/v1/records", json=payload, headers=headers)
     assert res.status_code == 400
