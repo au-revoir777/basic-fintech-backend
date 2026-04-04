@@ -1,377 +1,199 @@
-# Finance Dashboard Backend API
+# zorvyn-deploy
 
-A secure, scalable, and production-ready backend API for a financial dashboard built with FastAPI. Features JWT authentication, role-based access control (RBAC), comprehensive financial record management, and real-time analytics.
+[![Build Status](https://img.shields.io/travis/au-revoir777/zorvyn-deploy.svg?style=flat-square)](https://travis-ci.org/au-revoir777/zorvyn-deploy)
+[![License](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)](https://opensource.org/licenses/MIT)
+[![Python Version](https://img.shields.io/badge/python-3.9+-blue.svg?style=flat-square)](https://www.python.org/downloads/)
 
-[![FastAPI](https://img.shields.io/badge/FastAPI-005571?style=for-the-badge&logo=fastapi)](https://fastapi.tiangolo.com/)
-[![SQLAlchemy](https://img.shields.io/badge/SQLAlchemy-2.0-red?style=for-the-badge)](https://www.sqlalchemy.org/)
-[![SQLite](https://img.shields.io/badge/SQLite-003B57?style=for-the-badge&logo=sqlite&logoColor=white)](https://www.sqlite.org/)
-[![JWT](https://img.shields.io/badge/JWT-000000?style=for-the-badge&logo=JSON%20web%20tokens)](https://jwt.io/)
+This repository contains the backend API for the Zorvyn financial dashboard, built with FastAPI. It provides a secure, scalable, and production-ready foundation for financial data management and analysis.
 
 ## Features
 
-### Core Functionality
+*   **FastAPI Framework:** Leverages the high-performance FastAPI framework for building robust APIs.
+*   **JWT Authentication:** Implements JSON Web Token (JWT) based authentication for secure access.
+*   **Role-Based Access Control (RBAC):** Enforces granular access permissions based on user roles.
+*   **Financial Record Management:** Comprehensive API endpoints for creating, reading, updating, and deleting financial records.
+*   **Database Migrations:** Utilizes Alembic for managing database schema evolution.
+*   **Environment Variable Configuration:** Supports configuration through environment variables for flexible deployment.
+*   **Rate Limiting:** Implements rate limiting to protect the API from abuse.
 
-- **User Management**: Complete CRUD operations for users with role-based permissions
-- **Financial Records**: Full CRUD for income/expense tracking with advanced filtering
-- **Dashboard Analytics**: Real-time summaries, trends, and category breakdowns
-- **Authentication**: JWT-based auth with access/refresh token rotation
-- **Authorization**: Role-based access control (Viewer, Analyst, Admin)
+## Installation
 
-### Security & Performance
+### Prerequisites
 
-- **Security Headers**: CSP, X-Frame-Options, X-Content-Type-Options
-- **Rate Limiting**: Configurable per-minute request limits
-- **Account Protection**: Login attempt tracking and temporary lockouts
-- **Token Revocation**: Secure logout with refresh token blacklisting
-- **Input Validation**: Comprehensive Pydantic validation with detailed error messages
-- **SQL Injection Protection**: Parameterized queries via SQLAlchemy ORM
+*   Python 3.9+
+*   pip (Python package installer)
 
-### Developer Experience
-
-- **Auto-generated API Docs**: Interactive Swagger UI at `/docs`
-- **Hot Reload**: Development server with automatic code reloading
-- **Database Migrations**: Alembic for schema versioning and updates
-- **Type Safety**: Full type hints throughout the codebase
-- **Clean Architecture**: Repository → Service → API layer separation
-
-## Tech Stack
-
-- **Framework**: [FastAPI](https://fastapi.tiangolo.com/) - Modern, fast web framework
-- **ORM**: [SQLAlchemy 2.0](https://www.sqlalchemy.org/) - SQL toolkit and ORM
-- **Database**: SQLite (development) / PostgreSQL (production)
-- **Migrations**: [Alembic](https://alembic.sqlalchemy.com/) - Database migration tool
-- **Authentication**: [PyJWT](https://pyjwt.readthedocs.io/) - JSON Web Tokens
-- **Password Hashing**: [Passlib](https://passlib.readthedocs.io/) - Secure password hashing
-- **Validation**: [Pydantic](https://pydantic-docs.helpmanual.io/) - Data validation
-- **ASGI Server**: [Uvicorn](https://www.uvicorn.org/) - Lightning-fast ASGI server
-
-## Prerequisites
-
-- Python 3.9+
-- pip (Python package manager)
-- Virtual environment support (venv)
-
-## Quick Start
-
-### 1. Clone and Setup
+### Cloning the Repository
 
 ```bash
-# Clone the repository
-git clone <repository-url>
-cd assignment-zorvyn
-
-# Create virtual environment
-python -m venv .venv
-
-# Activate virtual environment
-# On Windows:
-.venv\Scripts\activate
-# On Linux/Mac:
-source .venv/bin/activate
+git clone https://github.com/au-revoir777/zorvyn-deploy.git
+cd zorvyn-deploy
 ```
 
-### 2. Install Dependencies
+### Setting up the Environment
+
+1.  **Create a virtual environment:**
+
+    ```bash
+    python -m venv venv
+    ```
+
+2.  **Activate the virtual environment:**
+
+    *   On Windows:
+        ```bash
+        .\venv\Scripts\activate
+        ```
+    *   On macOS and Linux:
+        ```bash
+        source venv/bin/activate
+        ```
+
+3.  **Install project dependencies:**
+
+    ```bash
+    pip install -r requirements.txt
+    ```
+
+4.  **Configure Environment Variables:**
+    Copy the example environment file and populate it with your specific settings.
+
+    ```bash
+    cp .env.example .env
+    ```
+
+    Edit the `.env` file and set the following variables:
+    *   `DATABASE_URL`: Your database connection string (e.g., `postgresql://user:password@host:port/database`).
+    *   `SECRET_KEY`: A strong, secret key for JWT signing.
+    *   `ALGORITHM`: The JWT signing algorithm (e.g., `HS256`).
+    *   `ACCESS_TOKEN_EXPIRE_MINUTES`: The expiration time for access tokens in minutes.
+    *   `REFRESH_TOKEN_EXPIRE_MINUTES`: The expiration time for refresh tokens in minutes.
+    *   `REDIS_HOST`: Redis host if used for caching or token blocklisting.
+    *   `REDIS_PORT`: Redis port if used.
+
+### Database Migrations
+
+Apply the database migrations to set up your database schema.
 
 ```bash
-pip install -r requirements.txt
-```
-
-### 3. Environment Configuration
-
-```bash
-# Copy environment template
-cp .env.example .env
-
-# Edit .env with your settings (optional - defaults work for development)
-# nano .env  # or your preferred editor
-```
-
-### 4. Database Setup
-
-```bash
-# Run database migrations
 alembic upgrade head
-
-# Optional: Create initial admin user
-python create_admin.py
 ```
 
-### 5. Start Development Server
+### Running the Development Server
 
 ```bash
-# Start with auto-reload
 uvicorn app.main:app --reload
-
-# Or specify host/port
-uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
 ```
 
-The API will be available at: `http://127.0.0.1:8000`
+The API will be accessible at `http://127.0.0.1:8000`.
 
-## API Documentation
+## Usage
 
-### Interactive Documentation
+### API Documentation
 
-- **Swagger UI**: `http://127.0.0.1:8000/docs`
-- **ReDoc**: `http://127.0.0.1:8000/redoc`
-- **OpenAPI Schema**: `http://127.0.0.1:8000/openapi.json`
+The API documentation is automatically generated and available at the `/docs` endpoint when the server is running.
 
-### API Endpoints Overview
+Access the interactive API documentation here: [https://zorvyn-deploy.vercel.app/docs](https://zorvyn-deploy.vercel.app/docs)
 
-| Endpoint                    | Method       | Description           | Access        |
-| --------------------------- | ------------ | --------------------- | ------------- |
-| `/health`                   | GET          | Health check          | Public        |
-| `/api/v1/auth/login`        | POST         | User authentication   | Public        |
-| `/api/v1/auth/refresh`      | POST         | Refresh access token  | Authenticated |
-| `/api/v1/auth/logout`       | POST         | Logout user           | Authenticated |
-| `/api/v1/users`             | GET/POST     | List/Create users     | Admin         |
-| `/api/v1/users/{id}`        | PATCH        | Update user           | Admin         |
-| `/api/v1/records`           | GET/POST     | List/Create records   | Viewer+       |
-| `/api/v1/records/{id}`      | PATCH/DELETE | Update/Delete record  | Analyst+      |
-| `/api/v1/dashboard/summary` | GET          | Financial summary     | Viewer+       |
-| `/api/v1/dashboard/trends`  | GET          | Income/expense trends | Viewer+       |
-| `/api/v1/dashboard/recent`  | GET          | Recent transactions   | Viewer+       |
+### Example API Calls
 
-## Authentication & Authorization
-
-### Authentication Flow
-
-1. **Login** with email/password to receive JWT tokens
-2. **Use access token** in `Authorization: Bearer <token>` header
-3. **Refresh tokens** when access token expires
-4. **Logout** to revoke refresh token
-
-### Example Login Request
+**1. User Registration (POST /api/v1/users/register)**
 
 ```bash
-curl -X POST "http://127.0.0.1:8000/api/v1/auth/login" \
-  -H "Content-Type: application/json" \
-  -d '{"email": "admin@example.com", "password": "admin"}'
+curl -X POST "https://zorvyn-deploy.vercel.app/api/v1/users/register" \
+-H "Content-Type: application/json" \
+-d '{
+  "email": "testuser@example.com",
+  "password": "securepassword123",
+  "full_name": "Test User"
+}'
 ```
 
-Response:
+**2. User Login (POST /api/v1/auth/login)**
 
-```json
-{
-  "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-  "refresh_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-  "token_type": "bearer"
-}
+```bash
+curl -X POST "https://zorvyn-deploy.vercel.app/api/v1/auth/login" \
+-H "Content-Type: application/json" \
+-d '{
+  "username": "testuser@example.com",
+  "password": "securepassword123"
+}'
 ```
 
-### Role-Based Permissions
+This will return an access token and a refresh token.
 
-| Role        | Description          | Permissions                           |
-| ----------- | -------------------- | ------------------------------------- |
-| **Viewer**  | Read-only access     | View records, dashboard analytics     |
-| **Analyst** | Data analyst         | All viewer permissions + CRUD records |
-| **Admin**   | System administrator | All permissions + user management     |
+**3. Create Financial Record (POST /api/v1/records)**
+Requires authentication. Include the access token in the `Authorization` header as a Bearer token.
 
-## Database Schema
-
-### Users Table
-
-```sql
-CREATE TABLE users (
-    id INTEGER PRIMARY KEY,
-    email VARCHAR(255) UNIQUE NOT NULL,
-    full_name VARCHAR(255) NOT NULL,
-    password_hash VARCHAR(255) NOT NULL,
-    role VARCHAR(20) NOT NULL DEFAULT 'viewer',
-    is_active BOOLEAN NOT NULL DEFAULT 1,
-    failed_login_attempts INTEGER NOT NULL DEFAULT 0,
-    locked_until DATETIME,
-    created_at DATETIME NOT NULL,
-    updated_at DATETIME NOT NULL
-);
+```bash
+curl -X POST "https://zorvyn-deploy.vercel.app/api/v1/records" \
+-H "Content-Type: application/json" \
+-H "Authorization: Bearer YOUR_ACCESS_TOKEN" \
+-d '{
+  "title": "Monthly Salary",
+  "amount": 5000.00,
+  "type": "income",
+  "category": "salary",
+  "date": "2023-10-27T10:00:00Z"
+}'
 ```
 
-### Financial Records Table
+**4. Get Financial Records (GET /api/v1/records)**
+Requires authentication.
 
-```sql
-CREATE TABLE financial_records (
-    id INTEGER PRIMARY KEY,
-    user_id INTEGER NOT NULL REFERENCES users(id),
-    amount DECIMAL(12,2) NOT NULL,
-    record_type VARCHAR(20) NOT NULL,
-    category VARCHAR(120) NOT NULL,
-    record_date DATE NOT NULL,
-    notes TEXT,
-    is_deleted BOOLEAN NOT NULL DEFAULT 0,
-    created_at DATETIME NOT NULL,
-    updated_at DATETIME NOT NULL
-);
-```
-
-### Token Blocklist Table
-
-```sql
-CREATE TABLE token_blocklist (
-    jti VARCHAR(255) PRIMARY KEY,
-    token_type VARCHAR(20) NOT NULL,
-    expires_at DATETIME NOT NULL
-);
+```bash
+curl -X GET "https://zorvyn-deploy.vercel.app/api/v1/records" \
+-H "Authorization: Bearer YOUR_ACCESS_TOKEN"
 ```
 
 ## Configuration
 
-### Environment Variables
+The application's configuration is managed through environment variables. The following variables are essential for running the application:
 
-| Variable                      | Default                | Description                |
-| ----------------------------- | ---------------------- | -------------------------- |
-| `APP_NAME`                    | Finance Dashboard API  | Application name           |
-| `API_V1_PREFIX`               | /api/v1                | API version prefix         |
-| `DATABASE_URL`                | sqlite:///./finance.db | Database connection URL    |
-| `JWT_SECRET_KEY`              | (required)             | Secret key for JWT signing |
-| `JWT_ALGORITHM`               | HS256                  | JWT algorithm              |
-| `ACCESS_TOKEN_EXPIRE_MINUTES` | 15                     | Access token lifetime      |
-| `REFRESH_TOKEN_EXPIRE_DAYS`   | 7                      | Refresh token lifetime     |
-| `CORS_ORIGINS`                | http://localhost:3000  | Allowed CORS origins       |
-| `RATE_LIMIT_PER_MINUTE`       | 120                    | Requests per minute limit  |
-| `LOGIN_MAX_ATTEMPTS`          | 5                      | Max failed login attempts  |
-| `LOGIN_LOCKOUT_MINUTES`       | 15                     | Account lockout duration   |
+| Variable Name                 | Description                                                              | Default Value |
+| :---------------------------- | :----------------------------------------------------------------------- | :------------ |
+| `DATABASE_URL`                | PostgreSQL connection URL.                                               | None          |
+| `SECRET_KEY`                  | Secret key for signing JWTs.                                             | None          |
+| `ALGORITHM`                   | JWT signing algorithm.                                                   | `HS256`       |
+| `ACCESS_TOKEN_EXPIRE_MINUTES` | Expiration time for access tokens in minutes.                            | `30`          |
+| `REFRESH_TOKEN_EXPIRE_MINUTES`| Expiration time for refresh tokens in minutes.                           | `720`         |
+| `REDIS_HOST`                  | Hostname for the Redis server (if used).                                 | `localhost`   |
+| `REDIS_PORT`                  | Port for the Redis server (if used).                                     | `6379`        |
+| `ITEMS_PER_PAGE`              | Default number of items to return per paginated request.                 | `50`          |
+| `API_V1_STR`                  | Base path for API version 1.                                             | `/api/v1`     |
 
-### Database Migration
+## API Endpoints
 
-```bash
-# Create new migration
-alembic revision --autogenerate -m "migration description"
+The API follows a RESTful architecture. Key endpoints include:
 
-# Apply migrations
-alembic upgrade head
+*   **Authentication (`/api/v1/auth`)**
+    *   `POST /login`: Authenticate a user and receive JWT tokens.
+    *   `POST /login/access-token`: Obtain a new access token using a refresh token.
+    *   `POST /refresh-token`: Obtain a new refresh token.
+    *   `POST /test-token`: Test the validity of a token.
+*   **Users (`/api/v1/users`)**
+    *   `POST /register`: Register a new user.
+    *   `GET /me`: Retrieve the currently authenticated user's information.
+    *   `PUT /me`: Update the currently authenticated user's information.
+*   **Financial Records (`/api/v1/records`)**
+    *   `POST /`: Create a new financial record.
+    *   `GET /`: Retrieve a list of financial records, with support for filtering and pagination.
+    *   `GET /{id}`: Retrieve a specific financial record by its ID.
+    *   `PUT /{id}`: Update a specific financial record by its ID.
+    *   `DELETE /{id}`: Delete a specific financial record by its ID.
+*   **Dashboard (`/api/v1/dashboard`)**
+    *   `GET /summary`: Retrieve a summary of financial data for the dashboard.
 
-# Rollback
-alembic downgrade -1
-```
-
-## Testing
-
-### Run Health Check
-
-```bash
-curl http://127.0.0.1:8000/health
-# Expected: {"status": "ok"}
-```
-
-### Run Existing Tests
-
-```bash
-pytest tests/
-```
-
-### Manual Testing with Swagger UI
-
-1. Visit `http://127.0.0.1:8000/docs`
-2. Use "Try it out" buttons on endpoints
-3. Authenticate using the login endpoint first
-
-## Deployment
-
-### Production Considerations
-
-1. **Database**: Switch from SQLite to PostgreSQL
-
-   ```bash
-   export DATABASE_URL="postgresql://user:pass@localhost/dbname"
-   ```
-
-2. **Security**: Change JWT secret key
-
-   ```bash
-   export JWT_SECRET_KEY="your-secure-random-key-here"
-   ```
-
-3. **HTTPS**: Enable SSL/TLS in production
-4. **Environment**: Set `ENV=production` for optimizations
-
-### Docker Deployment (Optional)
-
-```dockerfile
-FROM python:3.11-slim
-
-WORKDIR /app
-COPY requirements.txt .
-RUN pip install -r requirements.txt
-
-COPY . .
-RUN alembic upgrade head
-
-EXPOSE 8000
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
-```
-
-## Project Structure
-
-```
-assignment-zorvyn/
-├── alembic/                 # Database migrations
-│   ├── versions/           # Migration files
-│   └── env.py             # Migration environment
-├── app/                    # Application code
-│   ├── api/               # API routes
-│   │   └── v1/           # API v1 endpoints
-│   ├── core/             # Core functionality
-│   │   ├── config.py     # Configuration
-│   │   ├── deps.py       # Dependencies
-│   │   └── security.py   # Security utilities
-│   ├── db/               # Database setup
-│   ├── models/           # SQLAlchemy models
-│   ├── repositories/     # Data access layer
-│   ├── schemas/          # Pydantic schemas
-│   ├── services/         # Business logic
-│   └── utils/            # Utilities
-├── tests/                 # Test files
-├── .env.example          # Environment template
-├── alembic.ini           # Alembic configuration
-├── create_admin.py       # Admin user creation script
-├── main.py              # Application entry point
-├── requirements.txt      # Python dependencies
-└── README.md            # This file
-```
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
-### Development Guidelines
-
-- Follow PEP 8 style guidelines
-- Add type hints to new functions
-- Write tests for new features
-- Update documentation as needed
-- Use meaningful commit messages
+Detailed endpoint specifications, request/response schemas, and parameters can be found in the [API Documentation](https://zorvyn-deploy.vercel.app/docs).
 
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## Acknowledgments
-
-- [FastAPI](https://fastapi.tiangolo.com/) - The modern web framework
-- [SQLAlchemy](https://www.sqlalchemy.org/) - SQL toolkit and ORM
-- [Alembic](https://alembic.sqlalchemy.com/) - Database migration tool
-- [Pydantic](https://pydantic-docs.helpmanual.io/) - Data validation
-
-## Support
-
-If you have any questions or issues:
-
-1. Check the [API Documentation](http://127.0.0.1:8000/docs)
-2. Review the [Issues](../../issues) page
-3. Create a new issue with detailed information
-
 ---
 
-**Happy coding!**
-
-- **analyst**: viewer + create/update records
-- **admin**: analyst + delete records + user management
-
-## Notes / Trade-offs
-
-- Rate limiting uses in-memory storage (suitable for single process dev). Replace with Redis for multi-instance production.
-- HTTPS enforcement is expected at reverse proxy/load balancer level; app includes proxy-aware security headers.
+<p align="center">
+  <a href="https://readmeforge.app?utm_source=badge">
+    <img src="https://readmeforge.app/badge.svg" alt="Made with ReadmeForge" height="20">
+  </a>
+</p>
