@@ -1,4 +1,4 @@
-# zorvyn-deploy
+# basic-fintech-backend
 
 [![FastAPI](https://img.shields.io/badge/FastAPI-005571?style=for-the-badge&logo=fastapi)](https://fastapi.tiangolo.com/)
 [![SQLAlchemy](https://img.shields.io/badge/SQLAlchemy-2.0-red?style=for-the-badge)](https://www.sqlalchemy.org/)
@@ -7,7 +7,7 @@
 [![License](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)](https://opensource.org/licenses/MIT)
 [![Python Version](https://img.shields.io/badge/python-3.9+-blue.svg?style=flat-square)](https://www.python.org/downloads/)
 
-This repository contains the backend API for the Zorvyn financial dashboard, built with FastAPI. It provides a secure, scalable, and production-ready foundation for financial data management and analysis.
+This repository contains the backend API for a financial dashboard, built with FastAPI. It provides a secure, scalable, and production-ready foundation for financial data management and analysis.
 
 ## Features
 
